@@ -1,0 +1,5 @@
+# Use the prebuilt NASM objects bundled with aws-lc-sys so the SSH crypto
+# backend (aws-lc-rs, pulled in by russh) builds on Windows without a
+# system-wide NASM install.
+[env]
+AWS_LC_SYS_PREBUILT_NASM = "1"

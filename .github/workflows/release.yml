@@ -1,0 +1,77 @@
+name: Release
+
+# Build the Windows installer + portable exe and publish them to a GitHub Release.
+# Fires when you push a version tag (e.g. `git tag v1.0.0 && git push --tags`),
+# or manually from the Actions tab.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to create the release and upload assets
+
+jobs:
+  release:
+    runs-on: windows-latest # MSVC toolchain (pinned in rust-toolchain.toml) + WebView2 preinstalled
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: v
+        shell: pwsh
+        run: |
+          $ver = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          "version=$ver" >> $env:GITHUB_OUTPUT
+          "tag=v$ver"     >> $env:GITHUB_OUTPUT
+          Write-Host "Building SSHagement v$ver"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Caches src-tauri/target so re-runs skip the heavy aws-lc-rs / russh compile.
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Builds the frontend (beforeBuildCommand) + Rust release + NSIS installer,
+      # then creates a draft release and uploads the installer to it.
+      - name: Build app & create release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ steps.v.outputs.tag }}
+          releaseName: SSHagement ${{ steps.v.outputs.tag }}
+          releaseBody: |
+            Offline-first SSH client for Windows.
+
+            **Downloads** (see assets below):
+            - `SSHagement_${{ steps.v.outputs.version }}_x64-setup.exe` — installer (per-user, no admin).
+            - `SSHagement_${{ steps.v.outputs.version }}_x64-portable.exe` — standalone, no install.
+
+            > Not code-signed yet — Windows SmartScreen may warn on first launch: **More info → Run anyway**.
+          releaseDraft: true
+          prerelease: false
+
+      # tauri-action ships the installer but not the raw exe, so attach it too.
+      - name: Attach portable exe
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ver = "${{ steps.v.outputs.version }}"
+          $out = "SSHagement_${ver}_x64-portable.exe"
+          Copy-Item "src-tauri/target/release/SSHagement.exe" $out
+          gh release upload "${{ steps.v.outputs.tag }}" $out --clobber

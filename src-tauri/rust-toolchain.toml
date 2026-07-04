@@ -1,0 +1,6 @@
+# Tauri on Windows targets the MSVC toolchain. The GNU linker (mingw ld)
+# fails to link the `windows` crate's import library
+# ("export ordinal too large"), so we pin MSVC here.
+[toolchain]
+channel = "stable-x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc"]

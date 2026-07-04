@@ -1,0 +1,27 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window and any secondary windows (win-*)",
+  "windows": ["main", "win-*"],
+  "permissions": [
+    "core:default",
+    "core:app:allow-version",
+    "opener:default",
+    "opener:allow-open-url",
+    "store:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
+    "dialog:allow-save",
+    "dialog:allow-open",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-unmaximize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:webview:allow-set-webview-zoom",
+    "window-state:default"
+  ]
+}

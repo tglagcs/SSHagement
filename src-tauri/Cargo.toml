@@ -1,0 +1,45 @@
+[package]
+name = "sshagement"
+version = "1.0.0"
+description = "Offline-first, minimalist SSH client for Windows — a Termius alternative"
+authors = ["tglagcs"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "sshagement_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-store = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-dialog = "2"
+# Remember each window's size/position/maximized across restarts.
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+# Native OS credential store (Windows Credential Manager on this platform).
+keyring = { version = "3", features = ["windows-native"] }
+# Async SSH client (PTY over channels).
+russh = "0.54"
+tokio = { version = "1", features = ["rt-multi-thread", "io-util", "net", "sync", "macros", "time"] }
+# SOCKS5 proxy support (HTTP CONNECT is implemented inline in ssh.rs).
+tokio-socks = "0.5"
+base64 = "0.22"
+
+# Windows-only: tweak WebView2 settings (disable browser accelerator keys so
+# terminal shortcuts like Ctrl+R / Ctrl+Shift+C reach the shell, not the webview).
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.38"
+windows-core = "0.61"
+
