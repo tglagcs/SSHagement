@@ -14,8 +14,6 @@
 
 **Offline-first SSH client for Windows. No-cloud, no accounts, no telemetry.**
 
-<img src="assets/cover.png" alt="SSHagement">
-
 https://github.com/user-attachments/assets/1018a11a-ecb4-45a4-b91c-7418e9abdae5
 
 </div>
